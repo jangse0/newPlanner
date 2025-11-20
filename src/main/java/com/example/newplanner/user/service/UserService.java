@@ -1,5 +1,6 @@
 package com.example.newplanner.user.service;
 
+import com.example.newplanner.common.config.PasswordEncoder;
 import com.example.newplanner.common.entity.User;
 import com.example.newplanner.common.exception.CustomException;
 import com.example.newplanner.common.exception.ErrorCode;
@@ -21,8 +22,9 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    //유저 생성 (비밀번호 암호화x)
+    //유저 생성
     @Transactional
     public UserResponse createUser(UserCreateRequest request) {
 
@@ -35,7 +37,7 @@ public class UserService {
 
         User user = new User(
                 request.getUsername(),
-                request.getPassword(),
+                passwordEncoder.encode(request.getPassword()),
                 request.getEmail()
         );
 
@@ -61,7 +63,7 @@ public class UserService {
     public UserResponse updateUser(Long id, UserUpdateRequest request) {
         User user = findUser(id);
 
-        user.updateUserInfo(request.getUsername(), request.getEmail());
+        user.updateUser(request.getUsername(), request.getEmail());
 
         return new UserResponse(user);
     }
@@ -79,13 +81,14 @@ public class UserService {
     }
 
 
+    //로그인
     @Transactional
     public SessionUser login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //비밀번호 확인
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 

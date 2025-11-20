@@ -21,7 +21,7 @@ public class Schedule extends BaseEntity{
 
     //N:1 매핑
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     public Schedule(String title, String content, User user) {

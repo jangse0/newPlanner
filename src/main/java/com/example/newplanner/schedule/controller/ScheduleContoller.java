@@ -6,6 +6,7 @@ import com.example.newplanner.schedule.dto.ScheduleRequest;
 import com.example.newplanner.schedule.dto.ScheduleResponse;
 import com.example.newplanner.schedule.service.ScheduleService;
 import com.example.newplanner.user.SessionUser;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +23,11 @@ public class ScheduleContoller {
     @PostMapping("/api/schedules")
     public ResponseEntity<ScheduleResponse> createSchedule(
             @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser,
-            @RequestBody ScheduleRequest request) {
+            @Valid @RequestBody ScheduleRequest request) {
 
         checkedLogin(sessionUser);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.createSchedule(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.createSchedule(sessionUser.getUserId(), request));
     }
 
     //일정 조회(1개)
@@ -40,10 +41,10 @@ public class ScheduleContoller {
     public ResponseEntity<ScheduleResponse> updateSchedule(
             @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser,
             @PathVariable Long id,
-            @RequestBody ScheduleRequest request) {
+            @Valid @RequestBody ScheduleRequest request) {
         checkedLogin(sessionUser);
 
-        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.updateSchedule(id, request));
+        return ResponseEntity.status(HttpStatus.OK).body(scheduleService.updateSchedule(sessionUser.getUserId(), id, request));
     }
 
     //일정 삭제(로그인 추가)
@@ -53,7 +54,7 @@ public class ScheduleContoller {
             @PathVariable Long id) {
         checkedLogin(sessionUser);
 
-        scheduleService.deleteSchedule(id);
+        scheduleService.deleteSchedule(sessionUser.getUserId(), id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

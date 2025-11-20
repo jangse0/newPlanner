@@ -1,13 +1,11 @@
 package com.example.newplanner.user.controller;
 
-import com.example.newplanner.common.entity.User;
 import com.example.newplanner.user.SessionUser;
 import com.example.newplanner.user.dto.LoginRequest;
 import com.example.newplanner.user.dto.UserCreateRequest;
 import com.example.newplanner.user.dto.UserResponse;
 import com.example.newplanner.user.dto.UserUpdateRequest;
 import com.example.newplanner.user.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -53,6 +51,7 @@ public class UserController {
                 .body(userService.updateUser(id, request));
     }
 
+    //유저 삭제
     @DeleteMapping("/api/users/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
@@ -61,6 +60,7 @@ public class UserController {
                 .build();
     }
 
+    //로그인
     @PostMapping("/api/auth/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest request,
                                         HttpSession session) {

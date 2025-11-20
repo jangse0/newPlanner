@@ -22,9 +22,9 @@ public class ScheduleService {
 
     // 일정 생성
     @Transactional
-    public ScheduleResponse createSchedule(ScheduleRequest request) {
+    public ScheduleResponse createSchedule(Long userId, ScheduleRequest request) {
 
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Schedule schedule = new Schedule(
@@ -62,18 +62,15 @@ public class ScheduleService {
 
     // 일정 수정
     @Transactional
-    public ScheduleResponse updateSchedule(Long id, ScheduleRequest request) {
+    public ScheduleResponse updateSchedule(Long userId, Long id, ScheduleRequest request) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.SCHEDULE_NOT_FOUND));
 
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 수정
-        schedule.update(
-                request.getTitle(),
-                request.getContent()
-        );
+        schedule.update(request.getTitle(), request.getContent());
 
         Schedule updated = scheduleRepository.save(schedule);
 
@@ -89,9 +86,15 @@ public class ScheduleService {
 
     // 일정 삭제
     @Transactional
-    public void deleteSchedule(Long id) {
+    public void deleteSchedule(Long userId, Long id) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.SCHEDULE_NOT_FOUND));
+
+
+        //일정 작성자와 로그인한 사용자가 같은지 확인
+        if (!schedule.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
 
         scheduleRepository.delete(schedule);
     }

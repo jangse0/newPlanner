@@ -1,5 +1,7 @@
 package com.example.newplanner.user.controller;
 
+import com.example.newplanner.common.exception.CustomException;
+import com.example.newplanner.common.exception.ErrorCode;
 import com.example.newplanner.user.SessionUser;
 import com.example.newplanner.user.dto.LoginRequest;
 import com.example.newplanner.user.dto.UserCreateRequest;
@@ -47,12 +49,26 @@ public class UserController {
             @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser,
             @PathVariable Long id, @RequestBody UserUpdateRequest request) {
 
+        checkedLogin(sessionUser);
+
+        if (!sessionUser.getUserId().equals(id)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(id, request));
     }
 
     //유저 삭제
     @DeleteMapping("/api/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(
+            @SessionAttribute(name = "loginUser", required = false) SessionUser sessionUser,
+            @PathVariable Long id) {
+
+        checkedLogin(sessionUser);
+
+        if (!sessionUser.getUserId().equals(id)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
 
         userService.deleteUser(id);
 
@@ -70,6 +86,13 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("로그인 성공");
+    }
+
+    //로그인 상태 확인
+    private void checkedLogin(SessionUser user) {
+        if (user == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
     }
 
 }

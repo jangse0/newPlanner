@@ -58,7 +58,7 @@ public class UserService {
                 .toList();
     }
 
-    //유저 수정
+    //유저 수정(이름, 이메일만)
     @Transactional
     public UserResponse updateUser(Long id, UserUpdateRequest request) {
         User user = findUser(id);

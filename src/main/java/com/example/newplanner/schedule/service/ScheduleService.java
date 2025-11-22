@@ -69,6 +69,11 @@ public class ScheduleService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        //일정 작성자와 로그인한 사용자가 같은지 확인
+        if (!schedule.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
         // 수정
         schedule.update(request.getTitle(), request.getContent());
 
